@@ -189,7 +189,7 @@ void loop() {
   
     sensorPripare();
     blinkLedWidget();
-   // Serial.println("security aktif");
+   
     if(stateSensor==true){
       stateLam=true;
       takePhoto();     
@@ -269,8 +269,7 @@ void sensorPripare(){
   if(pir_1 == LOW && pir_2 == LOW){
     stateSensor = false;
   }
-//  Serial.println(pir_1);
-//  Serial.println(pir_2);
+
 }
 
 void outLamp(){
@@ -327,7 +326,7 @@ int TimerBack(bool state){
  if(tmr - SBack > DBack){
   SBack = tmr;
   timer++;
-  Serial.println(timer); 
+ 
  }
   }
 
@@ -337,3 +336,13 @@ int TimerBack(bool state){
   }
 
 }
+
+/*
+void PRINTDEBUG(){
+  // Serial.println("security aktif");
+  //  Serial.println(pir_1);
+//  Serial.println(pir_2);
+ // Serial.println("lampu");
+  Serial.println(timer); 
+}
+*/

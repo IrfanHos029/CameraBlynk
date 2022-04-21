@@ -19,8 +19,8 @@ char auth[] = "xq7WcIs5C-c4E88y4k-YzXOw7Nhr_EgR";  //sent by Blynk
 #define ButSecurity 3
 #define FLASH 4
 
-byte pir_1=0;
-byte pir_2=0;
+byte pir_1 = 0;
+byte pir_2 = 0;
 bool stateLam = false;
 bool statePir1 = false;
 bool statePir2 = false;
@@ -36,8 +36,8 @@ byte Dindi = 1000;
 byte DRecon = 1000;
 byte DBack = 1000;
 bool stateI = false;
-int counter=0;
-int timer=0;
+int counter = 0;
+int timer = 0;
 byte batas = 122;
 
 String local_IP;
@@ -56,26 +56,26 @@ WidgetLED led3(V5);
 //BlynkTimer timer;
 
 void blinkLedWidget()
-{ 
+{
   led1.setColor(BLYNK_YELLOW);
   unsigned long tmr = millis();
-  
-  if(tmr - SLedV > Dindi){
+
+  if (tmr - SLedV > Dindi) {
     SLedV = tmr;
-  if (led1.getValue()) {
-    led1.off();
-    //Serial.println("LED on V1: off");
-  } else {
-    led1.on();
-    //Serial.println("LED on V1: on");
-       }
+    if (led1.getValue()) {
+      led1.off();
+      //Serial.println("LED on V1: off");
+    } else {
+      led1.on();
+      //Serial.println("LED on V1: on");
     }
+  }
 }
 
 BLYNK_WRITE(V0)
 {
   byte pinValue = param.asInt();
-  if(pinValue == 1){
+  if (pinValue == 1) {
     Blynk.notify("CONTROLLER DIRESET");
     delay(200);
     ESP.restart();
@@ -85,8 +85,8 @@ BLYNK_WRITE(V0)
 void takePhoto()
 {
   uint32_t randomNum = random(50000);
-  Serial.println("http://"+local_IP+"/capture?_cb="+ (String)randomNum);
-  Blynk.setProperty(V4, "urls", "http://"+local_IP+"/capture?_cb="+(String)randomNum);
+  Serial.println("http://" + local_IP + "/capture?_cb=" + (String)randomNum);
+  Blynk.setProperty(V4, "urls", "http://" + local_IP + "/capture?_cb=" + (String)randomNum);
   led1.setColor(BLYNK_BLUE);
   delay(1000);
 }
@@ -95,11 +95,11 @@ void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.println();
-  pinMode(lampu,OUTPUT);
-  pinMode(pir_1,INPUT);
-  pinMode(pir_2,INPUT);
-  pinMode(indikator,OUTPUT);
-  
+  pinMode(lampu, OUTPUT);
+  pinMode(pir_1, INPUT);
+  pinMode(pir_2, INPUT);
+  pinMode(indikator, OUTPUT);
+
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -121,10 +121,10 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  
+
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
-  if(psramFound()){
+  if (psramFound()) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
@@ -154,13 +154,13 @@ void setup() {
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-   // digitalWrite(33,HIGH);
-    digitalWrite(indikator,LOW);
+    // digitalWrite(33,HIGH);
+    digitalWrite(indikator, LOW);
     Serial.print(".");
     delay(500);
   }
   //digitalWrite(33,LOW);
-  digitalWrite(indikator,HIGH);
+  digitalWrite(indikator, HIGH);
   Serial.println("");
   Serial.println("WiFi connected");
 
@@ -172,177 +172,177 @@ void setup() {
   Serial.println("' to connect");
   Blynk.begin(auth, ssid, password);
   //timer.setInterval(1000L, blinkLedWidget);
-   led1.on();
-   led2.on();
-   led3.on();
+  led1.on();
+  led2.on();
+  led3.on();
   Blynk.notify("CAMERA AKTIVE");
 }
 
 void loop() {
-  
+
   Blynk.run();
- // timer.run();
+  // timer.run();
   Indikator();
   Reconnect();
-  
-  if(stateSecurity==true){
-  
+
+  if (stateSecurity == true) {
+
     sensorPripare();
     blinkLedWidget();
-   
-    if(stateSensor==true){
-      stateLam=true;
-      takePhoto();     
+
+    if (stateSensor == true) {
+      stateLam = true;
+      takePhoto();
       led2.setColor(BLYNK_GREEN);
       led3.setColor(BLYNK_YELLOW);
       Blynk.notify("OBJEK TERDETEKSI");
-      timer=0;
-      SBack=0;
+      timer = 0;
+      SBack = 0;
     }
 
-    else if(stateSensor == false){
-        led3.setColor(BLYNK_RED);
-        TimerBack(1);
-        while(timer >= batas){
-        stateLam=false;
+    else if (stateSensor == false) {
+      led3.setColor(BLYNK_RED);
+      TimerBack(1);
+      while (timer >= batas) {
+        stateLam = false;
         led2.setColor(BLYNK_RED);
-        timer=0;
+        timer = 0;
         break;
+      }
     }
   }
+  else {
+    led1.on();
+    led1.setColor(BLYNK_GREEN);
+    led3.setColor(BLYNK_GREEN);
   }
-  else{
-  led1.on();
-  led1.setColor(BLYNK_GREEN); 
-  led3.setColor(BLYNK_GREEN);
-  }
-  
+
   systemSecurity();
   outLamp();
-  
+
 }
 
-void systemSecurity(){
+void systemSecurity() {
 
-     if(digitalRead(PHOTO) == LOW){
-       Serial.println("Capture Photo");
-       takePhoto();
-     }
- 
-     if(digitalRead(ButSecurity)==HIGH){
-      stateSecurity=true; 
-      
-     }
-     
-     else if(digitalRead(ButSecurity)==LOW){
-      stateSecurity=false;
-      timer=0;
-     }
+  if (digitalRead(PHOTO) == LOW) {
+    Serial.println("Capture Photo");
+    takePhoto();
+  }
 
-     if(digitalRead(butLampu) == HIGH && stateSecurity == false){
-       stateLam=true;
-       led2.setColor(BLYNK_GREEN);
-      } 
+  if (digitalRead(ButSecurity) == HIGH) {
+    stateSecurity = true;
 
-     else if(digitalRead(butLampu) == LOW && stateSecurity == false){
-       stateLam=false;
-       led2.setColor(BLYNK_RED);
-      } 
+  }
 
-      
-  
+  else if (digitalRead(ButSecurity) == LOW) {
+    stateSecurity = false;
+    timer = 0;
+  }
+
+  if (digitalRead(butLampu) == HIGH && stateSecurity == false) {
+    stateLam = true;
+    led2.setColor(BLYNK_GREEN);
+  }
+
+  else if (digitalRead(butLampu) == LOW && stateSecurity == false) {
+    stateLam = false;
+    led2.setColor(BLYNK_RED);
+  }
+
+
+
 }
 
-void sensorPripare(){
+void sensorPripare() {
   pir_1 = digitalRead(pir1);
   pir_2 = digitalRead(pir2);
 
-  if(pir_1 == HIGH && pir_2 == HIGH){
+  if (pir_1 == HIGH && pir_2 == HIGH) {
     stateSensor = true;
   }
-  if(pir_1 == HIGH && pir_2 == LOW){
+  if (pir_1 == HIGH && pir_2 == LOW) {
     stateSensor = false;
   }
-  if(pir_1 == LOW && pir_2 == HIGH){
+  if (pir_1 == LOW && pir_2 == HIGH) {
     stateSensor = false;
   }
-  if(pir_1 == LOW && pir_2 == LOW){
+  if (pir_1 == LOW && pir_2 == LOW) {
     stateSensor = false;
   }
 
 }
 
-void outLamp(){
-  if(stateLam == true){
-    digitalWrite(lampu,HIGH);
-   // Serial.println("lampu");
+void outLamp() {
+  if (stateLam == true) {
+    digitalWrite(lampu, HIGH);
+    // Serial.println("lampu");
   }
-  else if(stateLam == false){
-    digitalWrite(lampu,LOW);
+  else if (stateLam == false) {
+    digitalWrite(lampu, LOW);
   }
 
-  if(stateI == true){
-    digitalWrite(indikator,HIGH);
+  if (stateI == true) {
+    digitalWrite(indikator, HIGH);
   }
-  else if(stateI == false){
-    digitalWrite(indikator,LOW);
+  else if (stateI == false) {
+    digitalWrite(indikator, LOW);
   }
 }
 
-void Reconnect(){
+void Reconnect() {
   unsigned long tmr = millis();
 
-if (WiFi.status() != WL_CONNECTED) {
-  if(tmr - SRecon > DRecon){
-        SRecon = tmr;
-        counter++;
-        if(counter == 120){
+  if (WiFi.status() != WL_CONNECTED) {
+    if (tmr - SRecon > DRecon) {
+      SRecon = tmr;
+      counter++;
+      if (counter == 120) {
         Serial.println("RESTART");
         ESP.restart();
-        }
-   }
-}
+      }
+    }
+  }
 }
 
-void Indikator(){
+void Indikator() {
   unsigned long tmr = millis();
-  
+
   if (WiFi.status() != WL_CONNECTED) {
-    if(tmr - Sindi > Dindi){
+    if (tmr - Sindi > Dindi) {
       Sindi = tmr;
-      stateI = !stateI;     
+      stateI = !stateI;
     }
   }
-  
-  else if(WiFi.status() == WL_CONNECTED){
+
+  else if (WiFi.status() == WL_CONNECTED) {
     stateI = true;
-    }
+  }
 }
 
-int TimerBack(bool state){
-  
-  if(state==1){
-  unsigned long tmr = millis();
- if(tmr - SBack > DBack){
-  SBack = tmr;
-  timer++;
- 
- }
+int TimerBack(bool state) {
+
+  if (state == 1) {
+    unsigned long tmr = millis();
+    if (tmr - SBack > DBack) {
+      SBack = tmr;
+      timer++;
+
+    }
   }
 
-  else if(state==0){
-    timer=0;
-    SBack=0;
+  else if (state == 0) {
+    timer = 0;
+    SBack = 0;
   }
 
 }
 
 /*
-void PRINTDEBUG(){
+  void PRINTDEBUG(){
   // Serial.println("security aktif");
   //  Serial.println(pir_1);
-//  Serial.println(pir_2);
- // Serial.println("lampu");
-  Serial.println(timer); 
-}
+  //  Serial.println(pir_2);
+  // Serial.println("lampu");
+  Serial.println(timer);
+  }
 */

@@ -31,10 +31,14 @@ bool stateSecurity = false;
 unsigned long Sindi = 0;
 unsigned long SLedV = 0;
 unsigned long SRecon = 0;
+unsigned long SBack = 0;
 byte Dindi = 1000;
 byte DRecon = 1000;
+byte DBack = 1000;
 bool stateI = false;
 int counter=0;
+int timer=0;
+byte batas = 30;
 
 String local_IP;
 void startCameraServer();
@@ -183,18 +187,26 @@ void loop() {
   
     sensorPripare();
     blinkLedWidget();
-    Serial.println("security aktif");
+   // Serial.println("security aktif");
     if(stateSensor==true){
-      takePhoto();     
       stateLam=true;
+      takePhoto();     
       led2.setColor(BLYNK_YELLOW);
       Blynk.notify("OBJEK TERDETEKSI");
+      timer=0;
+      SBack=0;
     }
 
     else if(stateSensor == false){
-      stateLam=false;
-      led2.setColor(BLYNK_RED);
+      TimerBack(1);
+
+       while(timer >= batas){
+        stateLam=false;
+        led2.setColor(BLYNK_RED);
+        timer=0;
+        break;
     }
+  }
   }
   else{
   led1.on();
@@ -215,10 +227,12 @@ void systemSecurity(){
  
      if(digitalRead(ButSecurity)==HIGH){
       stateSecurity=true; 
+      
      }
      
      else if(digitalRead(ButSecurity)==LOW){
       stateSecurity=false;
+      timer=0;
      }
 
      if(digitalRead(butLampu) == HIGH && stateSecurity == false){
@@ -230,6 +244,8 @@ void systemSecurity(){
        stateLam=false;
        led2.setColor(BLYNK_RED);
       } 
+
+      
   
 }
 
@@ -256,7 +272,7 @@ void sensorPripare(){
 void outLamp(){
   if(stateLam == true){
     digitalWrite(lampu,HIGH);
-    Serial.println("lampu");
+   // Serial.println("lampu");
   }
   else if(stateLam == false){
     digitalWrite(lampu,LOW);
@@ -298,4 +314,22 @@ void Indikator(){
   else if(WiFi.status() == WL_CONNECTED){
     stateI = true;
     }
+}
+
+int TimerBack(bool state){
+  
+  if(state==1){
+  unsigned long tmr = millis();
+ if(tmr - SBack > DBack){
+  SBack = tmr;
+  timer++;
+  Serial.println(timer); 
+ }
+  }
+
+  else if(state==0){
+    timer=0;
+    SBack=0;
+  }
+
 }

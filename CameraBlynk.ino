@@ -38,7 +38,7 @@ byte DBack = 1000;
 bool stateI = false;
 int counter=0;
 int timer=0;
-byte batas = 30;
+byte batas = 122;
 
 String local_IP;
 void startCameraServer();
@@ -51,6 +51,7 @@ void startCameraServer();
 
 WidgetLED led1(V2);
 WidgetLED led2(V3);
+WidgetLED led3(V5);
 
 //BlynkTimer timer;
 
@@ -173,6 +174,7 @@ void setup() {
   //timer.setInterval(1000L, blinkLedWidget);
    led1.on();
    led2.on();
+   led3.on();
   Blynk.notify("CAMERA AKTIVE");
 }
 
@@ -191,16 +193,17 @@ void loop() {
     if(stateSensor==true){
       stateLam=true;
       takePhoto();     
-      led2.setColor(BLYNK_YELLOW);
+      led2.setColor(BLYNK_GREEN);
+      led3.setColor(BLYNK_YELLOW);
       Blynk.notify("OBJEK TERDETEKSI");
       timer=0;
       SBack=0;
     }
 
     else if(stateSensor == false){
-      TimerBack(1);
-
-       while(timer >= batas){
+        led3.setColor(BLYNK_RED);
+        TimerBack(1);
+        while(timer >= batas){
         stateLam=false;
         led2.setColor(BLYNK_RED);
         timer=0;
@@ -211,6 +214,7 @@ void loop() {
   else{
   led1.on();
   led1.setColor(BLYNK_GREEN); 
+  led3.setColor(BLYNK_GREEN);
   }
   
   systemSecurity();
